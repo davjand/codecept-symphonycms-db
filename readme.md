@@ -13,8 +13,17 @@ This is intended to be used in conjunction with the existing Db module for setup
 
 ## Setup
 
+The module has no configuration parameters however you must define the symphony DOCROOT within your *bootstrap.php* file for this to work
 
+An older version of symphony is included in the repository (the repo was developed for testing an old repo) however by changing the path below to **your included symphony source** that you are testing you can use that.
 
+```php
+define('DOCROOT',__DIR__ . '/../symphony/2.3.6/');
+```
+
+This will access the database through the settings in your **manifest/config.php** file.
+
+Please note that in some environments, you need to have your host as **127.0.0.1** for the database rather than localhost for using with codeception.
 
 
 ## Functions

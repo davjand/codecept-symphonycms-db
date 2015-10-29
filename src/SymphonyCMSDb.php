@@ -2,6 +2,7 @@
 namespace Codeception\Module;
 
 use Codeception\Module;
+use Symfony\Component\Yaml\Yaml;
 
 //Core Symphony
 define('DOMAIN',NULL);
@@ -16,6 +17,8 @@ include_once(TOOLKIT.'/class.fieldmanager.php');
 
 
 class SymphonyCMSDb extends Module{
+
+    public $config = array('fixtures' => 'tests/_fixtures');
 
     // HOOK: used after configuration is loaded
     public function _initialize() {
@@ -74,7 +77,7 @@ class SymphonyCMSDb extends Module{
         Expects key value format
 
     */
-    public function symHaveInDatabaseSingle($section,$data){
+    public function symHaveEntryInDatabase($section,$data){
         $sectionId = \SectionManager::fetchIDFromHandle($section);
 
         $entry = \EntryManager::create();
@@ -89,7 +92,7 @@ class SymphonyCMSDb extends Module{
 
     /*
 
-        symHaveInDatabase
+        symHaveEntriesInDatabase
 
         @param $section - Section Handle
         @param $data - Data array
@@ -106,17 +109,81 @@ class SymphonyCMSDb extends Module{
 
 
     */
-    public function symHaveInDatabase($section,$data){
+    public function symHaveEntriesInDatabase($section,$data){
         if(!is_array($data)){
-            throw "Non array passed";
+            throw new Exception("Non array passed");
         }
         $insertIds = array();
 
         foreach($data as $item){
-            $id = $this->symHaveInDatabaseSingle($section,$item);
+            $id = $this->symHaveEntryInDatabase($section,$item);
             array_push($insertIds,$id);
         }
         return $insertIds;
+    }
+
+
+    /*
+
+        Inserts multiple sections data into the database
+
+        @returns associative array of entry IDs by section.
+
+        Values can be in the format %section:position% to link entries togther.
+        Positions start at 1, not 0.
+
+        NB: The entries must be in the correct order for this, no logic will be applied to the run orde
+
+
+
+        Ie: array(
+            'people' => array(
+                1,2,3
+            ),
+            'dogs' => array(
+                5,6
+            )
+        );
+    */
+
+    public function symHaveInDatabase($data){
+        $returnData = array();
+
+        foreach($data as $section => $entries){
+            //Process the data to remove references
+            $entries = $this->processEntryData($entries,$returnData);
+            $returnData[$section] = $this->symHaveEntriesInDatabase($section,$entries);
+        }
+        return $returnData;
+    }
+
+
+
+    /*
+
+        Load a yml fixture into the Database
+
+        Expects format
+
+        people:
+            -
+                first-name: 'James'
+                last-name: 'Bond'
+            -
+                first-name: 'Daniel'
+                last-name: 'Craig'
+        dogs:
+            -
+                name: 'Rover'
+                owner: '%person:2%'
+
+        @returns an array of the inserted entryIds and their sections
+
+    */
+    public function symHaveFixtureInDatabase($fixture){
+        $data = Yaml::parse(file_get_contents($this->getFixturePath($fixture)));
+
+        return $this->symHaveInDatabase($data);
     }
 
 
@@ -139,10 +206,10 @@ class SymphonyCMSDb extends Module{
         $entry = \EntryManager::fetch( $entryId );
 		$entry = $entry[0];
         if( !$entry instanceof \Entry ){
-            throw "Unable to find entry";
+            throw new \Exception("Unable to find entry");
         }
         if(__ENTRY_OK__ != $entry->setDataFromPost($data,$errors,false,true)){
-            throw "Error setting data";
+            throw new \Exception("Error setting data");
         }
         $entry->commit();
     }
@@ -190,6 +257,37 @@ class SymphonyCMSDb extends Module{
 
     */
 
+
+    /*
+
+        Process array to replace %section:position% with an ID
+
+    */
+    protected function processEntryData($data,$idLookup){
+        if(is_array($data)){
+            foreach($data as $key => $val){
+                $data[$key] = $this->processEntryData($val,$idLookup);
+            }
+        }
+        elseif(is_string($data)){
+            if(substr_count($data,'%') == 2){
+                $string = str_replace('%','',$data);
+                $string = explode(':',$string);
+
+                $section = $string[0];
+                $pos = intval($string[1]) - 1;
+
+
+                if(array_key_exists($section,$idLookup) && array_key_exists($pos,$idLookup[$section])){
+                    $data = $idLookup[$section][$pos];
+                }else{
+                    throw new \Exception($section.":".$pos." Not found in:\n".print_r($idLookup,true));
+                }
+            }
+        }
+        return $data;
+    }
+
     /*
 
         Convert an entry into a key value array
@@ -203,7 +301,13 @@ class SymphonyCMSDb extends Module{
                 $data[$field['element_name']] = $entry->getData($field['id']);
             }
         }
+        $data['id'] = $entry->get('id');
         return $data;
+    }
+
+
+    protected function getFixturePath($fixture){
+        return codecept_root_dir() . $this->config['fixtures'] . "/" . $fixture .'.yml';
     }
 
 

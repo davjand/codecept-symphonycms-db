@@ -20,4 +20,4 @@ modules:
             password: ''
             dump: tests/_data/dump.sql
         SymphonyCMSDb:
-            symphony_path: "symphony/2.3.6/"
+            fixtures: 'tests/_fixtures'

@@ -1,0 +1,11 @@
+people:
+    -
+        first-name: 'James'
+        last-name: 'Bond'
+    -
+        first-name: 'Daniel'
+        last-name: 'Craig'
+dogs:
+    -
+        name: 'Rover'
+        owner: '%people:2%'

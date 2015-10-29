@@ -1,4 +1,5 @@
 <?php
+use Symfony\Component\Yaml\Yaml;
 //use \FunctionalTester;
 
 class SymphonyCMSDbCest
@@ -22,7 +23,7 @@ class SymphonyCMSDbCest
     //Can Insert data
     public function can_insert_entry_into_symphony(\FunctionalTester $I){
 
-        $id = $I->symHaveInDatabaseSingle('dogs',array(
+        $id = $I->symHaveEntryInDatabase('dogs',array(
             'name'=>'mark',
             'owner'=>'1',
             'born'=>'22/10/2010'
@@ -40,7 +41,7 @@ class SymphonyCMSDbCest
 
     public function can_insert_multiple_into_symphony(\FunctionalTester $I){
 
-        $idArr = $I->symHaveInDatabase('dogs',array(
+        $idArr = $I->symHaveEntriesInDatabase('dogs',array(
             array(
                 'name'=>'mark',
                 'owner'=>'1',
@@ -65,6 +66,49 @@ class SymphonyCMSDbCest
 
     }
 
+    public function can_insert_multiple_sections_data_into_symphony(\FunctionalTester $I){
+        $result = $I->symHaveInDatabase(array(
+            'people' => array(
+                array(
+                    'first-name'=>'mark',
+                    'last-name'=>'jones'
+                ),
+                array(
+                    'first-name'=>'john',
+                    'last-name'=>'jones'
+                ),
+            ),
+            'dogs' => array(
+                array(
+                    'name'=>'jon',
+                    'owner'=>'%people:2%',
+                )
+            )
+        ));
+
+        /*
+            Should have returned correct IDS
+        */
+        $I->assertEquals(count($result['people']),2);
+        $I->assertEquals(count($result['dogs']),1);
+
+        /*
+            The dog should be associated to the first person
+        */
+        $dogEntry = $I->symGetSectionEntryByID('dogs',$result['dogs'][0]);
+        $I->assertEquals($dogEntry['name']['handle'],'jon');
+        $I->assertEquals($dogEntry['owner']['relation_id'],$result['people'][1]);
+
+        /*
+            The person should have been added
+        */
+        $person = $I->symGetSectionEntryByID('people',$result['people'][1]);
+        $I->assertEquals($person['first-name']['handle'],'john');
+
+        $I->assertEquals($person['id'],$dogEntry['owner']['relation_id']);
+
+    }
+
 
     public function can_update_database_record(\FunctionalTester $I){
         $I->symUpdateDatabaseRecord('people',1,array('first-name'=>'jonathan','cool'=>'no','favourite-colour'=>array('Green')));
@@ -76,5 +120,21 @@ class SymphonyCMSDbCest
         $I->assertEquals($entry['cool']['value'],'no');
 
     }
+
+    public function can_load_yml_file_into_database(\FunctionalTester $I){
+
+        $result = $I->symHaveFixtureInDatabase('sample');
+
+        $I->assertEquals(count($result),2);
+
+
+        $dogEntry = $I->symGetSectionEntryByID('dogs',$result['dogs'][0]);
+        $I->assertEquals($dogEntry['name']['handle'],'rover');
+
+        $personEntry = $I->symGetSectionEntryByID('people',$result['people'][1]);
+        $I->assertEquals($personEntry['first-name']['handle'],'daniel');
+        $I->assertEquals($personEntry['id'],$dogEntry['owner']['relation_id']);
+    }
+
 
 }

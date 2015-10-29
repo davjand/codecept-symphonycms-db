@@ -1,5 +1,9 @@
 # Readme
 
+ - Use this at your own risk.
+ - MIT License
+ - dave@veodesign.co.uk
+
 A codeception module to facilitate integration with Symphony CMS (http://getsymphony.com).
 
 This is intended to be used in conjunction with the existing Db module for setup/teardown of databases. It currently offers functions putting your own fixture data into the database

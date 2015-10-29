@@ -12,13 +12,14 @@ Initial Release
 
 
 
-# Functions
+## Functions
 
 
-## symHaveInDatabase($sectionHandle,$data)
+### symHaveInDatabase($sectionHandle,$data)
 
 $data should be a multi-dimensional array in the format
 
+```php
 array(
     array(
         field_name: value
@@ -26,15 +27,16 @@ array(
         ),
     etc
     );
+```
 
 It *returns* an array of the inserted IDs
 
 
-## symHaveInDatabaseSingle($sectionHandle,$data)
+### symHaveInDatabaseSingle($sectionHandle,$data)
 
 Similar to symHaveInDatabase except exceptions only one entry.Accepts the data in key value format.
 
 
-## symUpdateDatabaseRecord($sectionHandle,$entryId,$data)
+### symUpdateDatabaseRecord($sectionHandle,$entryId,$data)
 
 This will update an existing record with the data passed. Accepts the data in key value format.

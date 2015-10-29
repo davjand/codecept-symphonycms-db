@@ -67,6 +67,8 @@ class SymphonyCMSDb extends Module{
 
     /*
         symHaveInDatabase
+        @param $section - The section handle
+        @param $data - The data to insert in the format array(field-name=>value)
 
         Inserts Data into the symphony database
         Expects key value format
@@ -87,7 +89,21 @@ class SymphonyCMSDb extends Module{
 
     /*
 
-        Expects a key value array in the following format
+        symHaveInDatabase
+
+        @param $section - Section Handle
+        @param $data - Data array
+
+        Expects a key value array in the following format:
+        array(
+            array(
+                field-name: value
+            )
+        )
+
+
+        @returns an array of inserted entryIds
+
 
     */
     public function symHaveInDatabase($section,$data){
@@ -107,7 +123,13 @@ class SymphonyCMSDb extends Module{
 
     /*
 
+        symUpdateDatabaseRecord
+
         Update a record in the database
+        @param $section - The Section Handle
+        @param $entryId - The Entry ID to update
+        @param $data - array(field-name => value)
+
 
     */
     public function symUpdateDatabaseRecord($section,$entryId,$data){
@@ -130,8 +152,12 @@ class SymphonyCMSDb extends Module{
 
     /*
 
-        Getting data
+        symGetSectionEntryByID
 
+        Returns a key value array of the data from a symphony entry
+
+        @param $section - Section Handle
+        @
 
     */
     public function symGetSectionEntryByID($section,$entryId){
@@ -165,7 +191,9 @@ class SymphonyCMSDb extends Module{
     */
 
     /*
+
         Convert an entry into a key value array
+
     */
     protected function buildEntryArray($entry,$sectionId){
         $data = array();

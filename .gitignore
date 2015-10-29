@@ -1,0 +1,4 @@
+vendor
+symphony/2.3.6/manifest/config.php
+.DS_Store
+tests/_output/*

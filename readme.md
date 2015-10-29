@@ -58,7 +58,7 @@ secton-handle:
         field-name-two: 'value2'
 ```
 
-Subsequent entries can be associated with previous entries using the format *section:position* as seen in the example below. The position starts at 1, not 0. The section with the relation must **be defined after** the entry it is being related to or an error will be thrown.
+Subsequent entries can be associated with previous entries using the format *%section:position%* as seen in the example below. The position starts at 1, not 0. The section with the relation must **be defined after** the entry it is being related to or an error will be thrown.
 
 NB: It is not currently possible to associate entries in the same section together.
 
@@ -78,6 +78,22 @@ dogs:
         owner: '%people:2%'
 ```
 
+### symHaveInDatabase($data)
+
+Inserts multiple sections data into the database in one go.
+
+Subsequent sections can be related to each other using the *%section:position%* format as above
+
+```php
+array(
+    'section-name' => array(
+        array(
+            'field-name': value
+            'field-name': value
+            ),
+    )
+);
+```
 
 
 ### symHaveEntriesInDatabase($sectionHandle,$data)
@@ -87,8 +103,8 @@ $data should be a multi-dimensional array in the format
 ```php
 array(
     array(
-        field_name: value
-        field_name: value
+        'field-name': value
+        'field_name': value
         ),
     etc
     );

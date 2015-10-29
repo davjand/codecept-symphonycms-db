@@ -1,4 +1,12 @@
 {
+	"name": "davjand/codecept-symphonycms-db",
+    "description": "Codeception SymphonyCMS Database Module",
+    "authors": [
+        {
+            "name": "David Andeson",
+            "email": "dave@veodesign.co.uk"
+        }
+    ],
 	"require": {
 
 	},
